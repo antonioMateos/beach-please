@@ -3,42 +3,111 @@ var express = require('express'),
 	app     = express(),
 	path    = require('path'),
 	http	= require('http').Server(app),
-  io = require("socket.io")(http), // app or http
+  io = require("socket.io")(http, {origins: '*:*'}), // app or http
 	bodyParser = require('body-parser'),
-  request = require('request'), // AJAX CORS
-  //(methodOverride = require("method-override");
+  cors = require('cors'),
+  request = require('request') // AJAX CORS
 
-console.log('- - - - Iniciando entorno');
+// console.log('- - - - Iniciando entorno');
+
 // CORS --> Cabeceras correctas
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
+//Access-Control-Allow-Origin
+app.use(function(req,res,next){
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Credentials",true);
+    res.header("Access-Control-Allow-Methods","POST,GET,OPTIONS");
+    next();
 });
+
+app.use(cors());
+
 // Parsers --> Poder mandar y recibir JSON
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-//app.use(methodOverride());
-
-console.log('- - - - Middlewares cargados...');
+// app.use(methodOverride());
+// console.log('- - - - Middlewares cargados...');
 
 console.log('- - - - FRONT ROUTES');
-app.use(express.static(__dirname + '/'));
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (request, response, next) {
 	response.sendFile(path.join(__dirname+'/index.html'));
 });
 
-console.log('- - - - END FRONT ROUTES');
+// console.log('- - - - END FRONT ROUTES');
 
 // AEMT SERVICE CONFIG
 aemt_config = require('./aemt_config') // <-- CONFIG file
 // <-- TO DO > Environment variables
 
-//SOCKET IO
-console.log('- - - - SOCKET IO');
+// FIREBASE SERVICE CONFIG 
+var firebase = require('firebase'); // Initialize Firebase
+var fib_config = require('./fib_config') // <-- CONFIG file
+firebase.initializeApp(fib_config); // Create Firebase instance
+var dbFib = firebase.database(); // Get a reference to the database service
+// <-- TO DO > Environment variables
 
+// SOCKET IO
+io.on('connection', function(socket){
+
+  //START CONNECTION
+  socket.emit('connect'); // SHOW IN CLIENT SIDE
+
+  // GLOBAL VAR FOR REPSONSES
+  var response;
+
+  // GET DATA
+  socket.on('get', function(data) {
+
+    // console.log("GET",data);
+    var what = data;
+    var ref = dbFib.ref(what); // REF FOR FIREBASE FETCH DATA
+
+    ref.on("value", function(snapshot) {
+        // console.log(snapshot.val());
+        response = snapshot.val();
+        io.sockets.emit('response', response);
+      }, function (errorObject) {
+        // console.log("The read failed: " + errorObject.code);
+        response = "The read failed: " + errorObject.code;
+        io.sockets.emit('response', response);
+      });
+
+  });
+
+  // GET DATA
+  socket.on('filter', function(data,type) {
+
+    console.log('Filter',data,type);
+    var what = '/spain/'+type;
+    var ref = dbFib.ref(what); // REF FOR FIREBASE FETCH DATA
+
+    ref.orderByChild("province_id").on("child_added", function(snapshot) {
+          data = data.toString();
+          var pid =  (snapshot.val().province_id).toString();
+          response = [];
+          // console.log(data,pid);
+          if(pid === data){
+            response = snapshot.val();
+            // snapshot.forEach(function(child) {
+            //   console.log(child.key);
+            //   //response.push(child);
+            // });
+            io.sockets.emit('response', response);
+          }
+          // io.sockets.emit('response', response);
+      }, function (errorObject) {
+        console.log("The read failed: " + errorObject.code);
+        response = "The read failed: " + errorObject.code;
+        io.sockets.emit('response', response);
+      });
+
+  });
+
+});
+
+/*
 io.on('connection', function(socket){
 
   //START CONNECTION
@@ -100,22 +169,12 @@ io.on('connection', function(socket){
   });
 
   //STOP STREAMING
-  /*
   socket.on('stop',function(){
     console.log("- - - - STOP Streaming - - - -");
   });
-*/
   
-  // STANDARD SOCKETS
-  /*
-  socket.on('new-message', function(data) {
-    //messages.push(data);
-    console.log(data.text);
-    io.sockets.emit('messages', messages);
-  });
-  */
 
-});
+});*/
 //END SOCKET IO
 
 // STARTING SERVER

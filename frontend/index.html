@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Node CORS">
+
+    <title>Node CORS</title>
+    <!-- FAVICON
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+    -->
+    <!-- MATERIAL CSS -->
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <!--Import Fontawesome -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- IMPORT Title font -->
+    <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+<div class="demo-layout-transparent mdl-layout mdl-js-layout mdl-right-nav">
+
+    <!-- NAVIGATION -->
+    <nav class="" role="navigation">
+        
+        <div class="nav-wrapper container">
+
+            <!-- HEADER MENU -->
+            <a id="logo-container" href="#" class="brand-logo center">BEACH PLEASE</a>
+            <ul class="right hide-on-med-and-down">
+                <!--<li><a href="#">Navbar Link</a></li>-->
+            </ul>
+
+            <!-- SIDE MENU 
+            <ul id="nav-mobile" class="side-nav">
+                <li><a href="#">Navbar Link</a></li>
+            </ul>
+            <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            -->
+            
+        </div>
+
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <!--
+        <div class="clearfix claim">
+            <h1>Loren Ipsum<br><strong>Dolor Sit Amet</strong></h1>
+        </div>
+        <div class="call-2-action">
+            <a href="" class="mdl-js-button">Call 2 Action</a>
+        </div>
+    -->
+    <main class="">
+
+        <div class="container">
+
+            <div class="row mts mbl">
+
+                <div class="col s6 center">
+                    <button data-id="provinces" class="btn btn-primary btn-start waves-effect waves-light get-btn">Get Provincias</button>
+                </div>
+                <div class="col s6 center">
+                    <button data-id="/spain/beaches" class="btn btn-secondary btn-start waves-effect waves-light get-btn">Get all Playas</button>
+                </div>
+
+                <!--
+                <div class="col s12 right">
+                    <button id="start-btn" class="btn btn-primary right btn-start waves-effect waves-light">Start Call</button>
+                    <button id="stop-btn" class="btn btn-secondary right btn-stop waves-effect waves-light red">Stop Calling</button>
+                </div>
+                -->
+                <div class="clearfix"></div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col s8">
+                    <h5 class="title">SERVER response&nbsp;<span id="search" style="display:none;"></span></h5>
+                </div>
+                <div class="col s4 stats" style="display:none;">
+                    <p class="right"><span title="Answers received"></span></p>
+                </div>
+
+                <div class="col s12 answersBox">
+
+                    <div id="response" class="responseBox">
+
+                        <p></p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>        
+
+    </main>
+
+</div>
+
+
+<!-- MATERIAL JS -->
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="js/materialize.min.js"></script>
+<script type="text/javascript" src="js/init.js"></script>
+
+<!-- WS -->
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script src="./js/ws.js"></script>
+<!-- END WS -->
+    
+</body>
+
+</html>

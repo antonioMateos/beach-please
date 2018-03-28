@@ -1,4 +1,4 @@
-console.log("SERVICE CONFIG FILE");
+console.log("=> AEMT CONFIG FILE");
 
 var aemt_config = {
     //SERVICE CONFIG
