@@ -57,7 +57,7 @@ io.on('connection', function(socket){
   // GLOBAL VAR FOR REPSONSES
   var response;
 
-  // GET DATA
+  // GET GLOBAL DATA
   socket.on('get', function(data) {
 
     // console.log("GET",data);
@@ -76,32 +76,97 @@ io.on('connection', function(socket){
 
   });
 
-  // GET DATA
+  // GET FILTERED DATA
   socket.on('filter', function(data,type) {
 
     console.log('Filter',data,type);
     var what = '/spain/'+type;
     var ref = dbFib.ref(what); // REF FOR FIREBASE FETCH DATA
+    var filteredResponse = [];
 
-    ref.orderByChild("province_id").on("child_added", function(snapshot) {
-          data = data.toString();
-          var pid =  (snapshot.val().province_id).toString();
-          response = [];
-          // console.log(data,pid);
-          if(pid === data){
-            response = snapshot.val();
-            // snapshot.forEach(function(child) {
-            //   console.log(child.key);
-            //   //response.push(child);
-            // });
-            io.sockets.emit('response', response);
-          }
-          // io.sockets.emit('response', response);
+    ref.orderByChild("province_id").on("value", function(snapshot) {
+
+          response = snapshot.val();
+
+          snapshot.forEach(function(child) {
+            var chunk = child.key;
+            var pid = response[chunk].province_id; // NOT WORKING cauz algunas borran el 0!
+            
+            if(pid.toString().length === 1){
+              //console.log("YEAH",pid);
+              pid = "0"+pid
+            }
+            
+            if(pid === data.toString()){
+              // console.log(data+" : "+pid,response[chunk].name);
+              filteredResponse.push(response[chunk]);
+            } else {
+              // NOPE!
+            }
+          });
+
+          io.sockets.emit('response', filteredResponse);
+
       }, function (errorObject) {
         console.log("The read failed: " + errorObject.code);
         response = "The read failed: " + errorObject.code;
         io.sockets.emit('response', response);
       });
+
+  });
+
+  // GET WEATHER
+  socket.on('get-weather', function(data) {
+
+    var dataID = data;
+    var apiKey = aemt_config.service.apiKey;
+    var url = "https://opendata.aemet.es/opendata/api/prediccion/especifica/playa/"+dataID+"/?api_key="+apiKey;
+    
+    // console.log(url);
+
+    var options = {
+      method: 'GET',
+      "rejectUnauthorized": false,
+      url: url,
+      qs: { 'api_key': apiKey },
+      headers: 
+       { 'cache-control': 'no-cache' }
+    };
+
+    request(options, function (error, response, body) {
+      //if (error) throw new Error(error);
+      if(error) {
+        console.log("e",error);
+        var e = "ERROR";
+        socket.emit("error",error);
+      };
+      //console.log("r",response);
+      //console.log("b",body);
+      getRealData(JSON.parse(body)); // With AEMET API we need a second ajax call because its response gives you the correct url to get the DATA
+    });
+
+    function getRealData(data) {
+
+      var options = {
+        method: 'GET',
+        "rejectUnauthorized": false,
+        url: data.datos,
+        headers: 
+         { 'cache-control': 'no-cache' }
+      };
+
+      request(options, function (error, response, body) {
+        //if (error) throw new Error(error);
+        if(error) {
+          console.log("e",error);
+          socket.emit("error",error);
+        };
+        // console.log("r",response);
+        // console.log("b",body);
+        socket.emit("response",JSON.parse(body));
+      });
+       
+    }
 
   });
 

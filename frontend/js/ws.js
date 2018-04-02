@@ -16,12 +16,12 @@ socket.on("connect", function(){
 });
 
 // TO DO --> Add key press font intro on search!!!
-var what;
+var type;
 $(document).on("click", ".get-btn", function() { // jQuery lazy loading
 
 	// console.log("=> Front calling");
 	var data = $(this).attr('data-id');
-	what = data;
+	type = data;
 	// console.log("GET",data);
 	socket.emit('get',data); // Send petition to server
 
@@ -31,38 +31,67 @@ $(document).on("click", ".filter-btn", function() { // jQuery lazy loading
 
 	// console.log("=> Front calling");
 	var data = $(this).attr('data-id');
-	var type = $(this).attr('data-type');
-	// console.log("GET",data);
+	type = $(this).attr('data-type');
+	// console.log("GET",data,type);
 	socket.emit('filter',data,type); // Send petition to server
+
+});
+
+$(document).on("click", ".weather-btn", function() { // jQuery lazy loading
+
+	// console.log("=> Front calling");
+	var data = $(this).attr('data-id');
+	type = $(this).attr('data-type');
+	// console.log("GET",data);
+	socket.emit('get-weather',data); // Send petition to server
 
 });
 
 socket.on("response", function(newResp){
 
-  // console.log("SERVER RESPONSE",newResp);
-  printAnswer(newResp,what);
+  console.log("SERVER RESPONSE",newResp);
+  printAnswer(newResp,type);
 
 });
 
+socket.on("error", function(e){
+
+  console.log("ERROR :: ",e);
+  // TO DO => UI for errors
+
+});
+
+var responseTemplate;
 //PRINT CALL ANSWER
-function printAnswer(data,what){
+function printAnswer(data,type){
 
 	cleanRespBox(); // <-- Clean response box at the begininng
 
-	var responseTemplate;
-
+	// console.log(data,type);	
+	// console.log(chunk + "\n" + JSON.stringify(data[chunk]) + "\n");
 	for (var chunk in data) {
-		// console.log(chunk + "\n" + JSON.stringify(data[chunk]) + "\n");
 
-		if(what === "provinces"){
+		if(type === "provinces"){
 			// console.log("PROVINCIAS");
 			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beaches" class="right btn btn-secondary btn-start waves-effect waves-light filter-btn">Ver playas</button></div><div class="clearfix mbm"></div>';
-		}else{
-			// console.log("BEACHES");
-			responseTemplate = '<p>'+data[chunk].id+' # <b>'+data[chunk].name+'</b></p>';
+		}
+
+		if(type === "beaches"){
+			// console.log(data);
+			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">AJAX Call</button></div><div class="clearfix mbm"></div>';
+		}
+
+		if(type === "beach"){
+			// console.log(data);
+			var today = data[0].prediccion.dia[0];
+			console.log(today);
+			responseTemplate = data[0].nombre+" : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
+			//responseTemplate = data[0].nombre+" : "+today.tMaximo.valor1+" : "+today.estadoCielo.descripcion2;
+			// responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">AJAX Call</button></div><div class="clearfix mbm"></div>';
 		}
 
 		$('#response').append(responseTemplate);
+
 	}
 
 }
@@ -125,5 +154,5 @@ function responseMsg(response) {
 // REFRESH Tw List
 function cleanRespBox() {
 	//Refresh ul tweetList
-	$('#response p').html("");
+	$('#response').html("");
 };
