@@ -93,11 +93,14 @@ io.on('connection', function(socket){
             var pid = response[chunk].province_id; // NOT WORKING cauz algunas borran el 0!
             
             if(pid.toString().length === 1){
-              //console.log("YEAH",pid);
-              pid = "0"+pid
+              pid = "0"+pid;
+              // console.log("YEAH",pid);
+            } else {
+              pid = pid;
+              // console.log("NOPE",pid);
             }
             
-            if(pid === data.toString()){
+            if(pid.toString() === data.toString()){
               // console.log(data+" : "+pid,response[chunk].name);
               filteredResponse.push(response[chunk]);
             } else {
@@ -170,76 +173,15 @@ io.on('connection', function(socket){
 
   });
 
-});
-
-/*
-io.on('connection', function(socket){
-
-  //START CONNECTION
-  var msg = 'Server ON';
-  socket.emit('connect',msg);
-
-  //URL SEARCH from front
-  socket.on('start',function(data){
-
-    console.log("CALLING AEMET",data);
-
-    var apiKey = aemt_config.service.apiKey;
-    // "https://opendata.aemet.es/opendata/api/prediccion/especifica/playa/1500401/?api_key=";
-    var url = data; 
-
-    var options = {
-      method: 'GET',
-      "rejectUnauthorized": false,
-      url: data,
-      qs: { 'api_key': apiKey },
-      headers: 
-       { 'cache-control': 'no-cache' }
-    };
-
-    request(options, function (error, response, body) {
-      //if (error) throw new Error(error);
-      if(error) {
-        console.log("e",error);
-        var e = "ERROR";
-        socket.emit("response",e);
-      };
-      //console.log("r",response);
-      //console.log("b",body);
-      getRealData(JSON.parse(body)); // With AEMET API we need a second ajax call because its response gives you the correct url to get the DATA
-    });
-
-    function getRealData(data) {
-
-      var options = {
-        method: 'GET',
-        "rejectUnauthorized": false,
-        url: data.datos,
-        headers: 
-         { 'cache-control': 'no-cache' }
-      };
-
-      request(options, function (error, response, body) {
-        //if (error) throw new Error(error);
-        if(error) {
-          console.log("e",error);
-        };
-        //console.log("r",response);
-        //console.log("b",body);
-        socket.emit("response",JSON.parse(body));
-      });
-       
-      }
-
-  });
-
   //STOP STREAMING
+  /*
   socket.on('stop',function(){
     console.log("- - - - STOP Streaming - - - -");
   });
-  
+  */
 
-});*/
+});
+
 //END SOCKET IO
 
 // STARTING SERVER

@@ -67,9 +67,17 @@ function printAnswer(data,type){
 
 	cleanRespBox(); // <-- Clean response box at the begininng
 
-	// console.log(data,type);	
+	// console.log(type);
+	if(type === "/spain/beaches"){
+		type = "beaches";
+	}
+
+	// console.log(data);	
 	// console.log(chunk + "\n" + JSON.stringify(data[chunk]) + "\n");
+
 	for (var chunk in data) {
+
+		// console.log(data[chunk].id,data[chunk].name)
 
 		if(type === "provinces"){
 			// console.log("PROVINCIAS");
@@ -77,16 +85,17 @@ function printAnswer(data,type){
 		}
 
 		if(type === "beaches"){
-			// console.log(data);
-			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">AJAX Call</button></div><div class="clearfix mbm"></div>';
+			// console.log("B");
+			// console.log(data[chunk].id,data[chunk].name);
+			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">Ver Clima</button></div><div class="clearfix mbm"></div>';
 		}
 
 		if(type === "beach"){
 			// console.log(data);
 			var today = data[0].prediccion.dia[0];
 			console.log(today);
-			responseTemplate = data[0].nombre+" : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
-			//responseTemplate = data[0].nombre+" : "+today.tMaximo.valor1+" : "+today.estadoCielo.descripcion2;
+			responseTemplate = "<b>"+data[0].nombre+"</b> : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
+			responseTemplate += "<br>- - - -<br>"+JSON.stringify(today);
 			// responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">AJAX Call</button></div><div class="clearfix mbm"></div>';
 		}
 
@@ -150,6 +159,12 @@ function responseMsg(response) {
 	Materialize.toast(toastContent, time, className); // 4000 is the duration of the toast
 
 }
+
+$(document).on("click", ".clear-btn", function() { // jQuery lazy loading
+
+	cleanRespBox();
+
+});
 
 // REFRESH Tw List
 function cleanRespBox() {
