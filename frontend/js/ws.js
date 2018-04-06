@@ -261,8 +261,28 @@ function callingAjax(url,callback) {
 function printAjax(resp){
 	console.log("- - - - \n");
 	if(resp.results[0] != undefined){
-		console.log(resp.results[0].formatted_address);
-		console.log(resp);
+		// var country = resp.results[0].address_components[3].long_name; // -> Country position changes
+		var country = resp.results[0].address_components // ARRAY;
+		var cL = country.length;
+		var check = false;
+
+		for(var i = 0; i < cL; i++){
+
+
+			if(country[i].short_name != "ES"){
+				// console.log("NOPE");
+				check === false;
+				console.warn(resp.results[0].formatted_address);
+			}else{
+				// console.log("YEAH");
+				check === true;
+				console.log("=> "+country[i].short_name);
+				console.log(resp.results[0].formatted_address);
+				console.log(resp);
+				break;
+			}
+		}
+
 	}else{
 		// console.error(resp);
 		console.error(resp.status);
