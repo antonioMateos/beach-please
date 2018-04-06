@@ -17,11 +17,15 @@ socket.on("connect", function(){
 
 // TO DO --> Add key press font intro on search!!!
 var type;
+var country;
 $(document).on("click", ".get-btn", function() { // jQuery lazy loading
 
 	// console.log("=> Front calling");
 	var data = $(this).attr('data-id');
 	type = data;
+	country = $('#country-select :selected').val(); 
+	// console.log(type,country);
+	data = "/"+country+"/"+data;
 	// console.log("GET",data);
 	socket.emit('get',data); // Send petition to server
 
@@ -66,6 +70,7 @@ var responseTemplate;
 function printAnswer(data,type){
 
 	cleanRespBox(); // <-- Clean response box at the begininng
+	// initMap(); // <- INIT Google Maps
 
 	// console.log(type);
 	if(type === "/spain/beaches"){
@@ -82,12 +87,15 @@ function printAnswer(data,type){
 		if(type === "provinces"){
 			// console.log("PROVINCIAS");
 			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beaches" class="right btn btn-secondary btn-start waves-effect waves-light filter-btn">Ver playas</button></div><div class="clearfix mbm"></div>';
+			initMap(data[chunk].name); // <- INIT Google Maps
 		}
 
 		if(type === "beaches"){
 			// console.log("B");
-			// console.log(data[chunk].id,data[chunk].name);
+			// console.log("Consulta maps",data[chunk].id,data[chunk].name," : ");
 			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">Ver Clima</button></div><div class="clearfix mbm"></div>';
+			var originQuery = 'Consulta maps '+data[chunk].id+' '+data[chunk].name+' : ';
+			initMap(data[chunk].name,data[chunk].id,originQuery); // <- INIT Google Maps
 		}
 
 		if(type === "beach"){
@@ -104,11 +112,6 @@ function printAnswer(data,type){
 	}
 
 }
-
-//API Call
-// var urlCall = "https://opendata.aemet.es/opendata/api/"+searchItems+"?api_key";
-// var urlCall = "https://opendata.aemet.es/opendata/api/valores/climatologicos/inventarioestaciones/todasestaciones/?api_key=";
-// var urlCall = "https://opendata.aemet.es/opendata/api/prediccion/especifica/playa/1500401/?api_key=";
 
 $('#stop-btn').click(function(){
 	$('#search').val("");
@@ -171,3 +174,97 @@ function cleanRespBox() {
 	//Refresh ul tweetList
 	$('#response').html("");
 };
+
+// GOOGLE MAPS
+var map;
+var myLatLng;
+var pos;
+var gKey = "AIzaSyDJrPFg_yBfFe5TCJlT83nXswvfOz8e3HU";
+
+function initMap(queryLoc,queryID,originQ) {
+
+	var queryID = queryID || "";
+	var originQ = originQ || "";
+
+	console.log("INIT MAPS!");
+
+	// var url = "https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key="+gKey;
+	if(queryID != ""){
+		var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryID+"+"+queryLoc+",+"+country+"CA&key="+gKey;
+		console.log(originQ);
+	} else {
+		var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryLoc+"+"+country+"CA&key="+gKey;
+	}
+
+	callingAjax(url,printAjax);
+
+	/* MY LAT AND MY LONG
+	if ("geolocation" in navigator) {
+		// SOLO POSICION 
+  		navigator.geolocation.getCurrentPosition(success, error);
+  		//CALLBACKS EXITO Y ERRORES
+		function success(user) {
+			pos = user.coords;
+			// console.warn(pos)
+			// myLatLng = {lat: 34.0399935, lng: -118.256498}
+			myLatLng = {lat: pos.latitude, lng: pos.longitude}
+			printMap(myLatLng)
+		}
+
+		function error(error) {
+			//console.warn("Error code:",error.message)
+		}
+	}
+	
+	google.maps.Map(document.getElementById('map'), {
+	    //CENTERING MAP
+	    center: myLatLng,
+	    zoom: 10
+	});
+	END MY LAT AND MY LONG */
+
+};
+
+function printMap(coordinates) {
+	console.log("PRINTING MAP!");
+	map = new
+	google.maps.Map(document.getElementById('map'), {
+	    //CENTERING MAP
+	    center: coordinates,
+	    zoom: 10
+	});
+};
+
+function callingAjax(url,callback) {
+
+    var xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.onreadystatechange = function() {
+
+        if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+
+            //console.info(JSON.parse(xmlHttp.responseText));
+            var dataInfo = JSON.parse(xmlHttp.responseText);
+            callback(dataInfo);
+
+        } else if (xmlHttp.readyState === 4 && xmlHttp.status === 404) {
+
+            console.error("ERROR! 404");
+            console.warn(JSON.parse(xmlHttp.responseText));
+
+        }
+    };
+    xmlHttp.open("GET", url, true);
+    xmlHttp.send();
+};
+
+function printAjax(resp){
+	console.log("- - - - \n");
+	if(resp.results[0] != undefined){
+		console.log(resp.results[0].formatted_address);
+		console.log(resp);
+	}else{
+		// console.error(resp);
+		console.error(resp.status);
+	}
+}

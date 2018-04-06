@@ -17,7 +17,7 @@
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"  media="screen,projection"/>
     <!--Import Fontawesome -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- IMPORT Title font -->
@@ -75,13 +75,22 @@
 
             <div class="row mts mbl">
 
-                <div class="col s4 center">
+                <div class="input-field col s3 center">
+                    <select id="country-select">
+                      <option value="" disabled>Select country</option>
+                      <option value="spain" selected>España</option>
+                    </select>
+                    <!--
+                    <label>Materialize Select</label>
+                    -->
+                </div>
+                <div class="input-field col s3 center">
                     <button data-id="provinces" class="btn btn-primary btn-start waves-effect waves-light get-btn">Get Provincias</button>
                 </div>
-                <div class="col s4 center">
-                    <button data-id="/spain/beaches" class="btn btn-secondary btn-start waves-effect waves-light get-btn">Get all Playas</button>
+                <div class="input-field col s3 center">
+                    <button data-id="beaches" class="btn btn-secondary btn-start waves-effect waves-light get-btn">Get all Playas</button>
                 </div>
-                <div class="col s4 right">
+                <div class="input-field col s3 right">
                     <button data-id="" class="btn right btn-start waves-effect waves-light clear-btn">CLEAR</button>
                 </div>
 
@@ -92,6 +101,22 @@
                 </div>
                 -->
                 <div class="clearfix"></div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col s12">
+                    <h5 class="title">Map</h5>
+                </div>
+
+                <div class="col s12 answersBox" style="display:none;">
+
+                    <div id="map" class="responseBox">
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -124,14 +149,21 @@
 <!-- MATERIAL JS -->
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="js/materialize.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script type="text/javascript" src="js/init.js"></script>
 
 <!-- WS -->
 <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 <script src="./js/ws.js"></script>
 <!-- END WS -->
-    
+
+<!-- G MAPS -->
+<!-- with callback
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBce7z20_LG94V7rnnzWJltHGCeFl0Sah8&callback=initMap"></script>
+-->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJrPFg_yBfFe5TCJlT83nXswvfOz8e3HU"></script>
+<!-- END G MAPS -->
+
 </body>
 
 </html>
