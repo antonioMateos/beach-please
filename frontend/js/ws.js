@@ -74,12 +74,12 @@ var responseTemplate;
 function printAnswer(data,type){
 
 	cleanRespBox(); // <-- Clean response box at the begininng
-	// initMap(); // <- INIT Google Maps
+	checkMapState();
 
-	// console.log(type);
+	/* console.log(type);
 	if(type === "/spain/beaches"){
 		type = "beaches";
-	}
+	}*/
 
 	// console.log(data);	
 	// console.log(chunk + "\n" + JSON.stringify(data[chunk]) + "\n");
@@ -108,7 +108,7 @@ function printAnswer(data,type){
 			responseTemplate = "<b>"+queryMap.l+"</b> : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
 			responseTemplate += "<br>- - - -<br>"+JSON.stringify(today);
 
-			console.log("gMap Q :",queryMap.l,queryMap.c,queryMap.r);			
+			// console.log("gMap Q :",queryMap.l,queryMap.c,queryMap.r);			
 			initMap(); // <- INIT Google Maps
 		}
 
@@ -178,6 +178,7 @@ $(document).on("click", ".clear-btn", function() { // jQuery lazy loading
 function cleanRespBox() {
 	//Refresh ul tweetList
 	$('#response').html("");
+	checkMapState();
 };
 
 // GOOGLE MAPS
@@ -192,18 +193,20 @@ var queryMap = {
 	r: ""	// Region
 };
 
+var mapState = false;
+function checkMapState(){
+	if(mapState === true){
+		$("#mapBox").toggle();
+		mapState = false;
+	}
+};
 
 function initMap() {
 
-	/*
-	var queryCP = queryCP || "";
-	var region = region || "";
-	*/
+	// console.log("INIT MAP!");
 	var queryCP = queryMap.c;
 	var queryLoc = queryMap.l;
 	var region = queryMap.r;
-
-	console.log("INIT MAP!");
 
 	var url;
 
@@ -266,10 +269,11 @@ function printMap(coordinates) {
 	google.maps.Map(document.getElementById('map'), {
 	    //CENTERING MAP
 	    center: coordinates,
-	    zoom: 15
+	    zoom: 10
 	});
 
 	$("#mapBox").toggle(); // <- SHow map box
+	mapState = true;
 
 	var marker = new google.maps.Marker({
 		position: coordinates,
@@ -304,7 +308,7 @@ function callingAjax(url,callback) {
 
 function printAjax(resp){
 	
-	console.log("- - - - \n");
+	// console.log("- - - - \n");
 
 	if(resp.results[0] != undefined){
 		var coord = resp.results[0].geometry.location;
