@@ -46,6 +46,10 @@ $(document).on("click", ".weather-btn", function() { // jQuery lazy loading
 	// console.log("=> Front calling");
 	var data = $(this).attr('data-id');
 	type = $(this).attr('data-type');
+	// GOOGLE MAPS 
+	queryMap.r = getRegion(country);
+	queryMap.c = fixEScode($(this).attr('data-id'));
+	queryMap.l = $(this).attr('data-location');
 	// console.log("GET",data);
 	socket.emit('get-weather',data); // Send petition to server
 
@@ -87,24 +91,25 @@ function printAnswer(data,type){
 		if(type === "provinces"){
 			// console.log("PROVINCIAS");
 			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beaches" class="right btn btn-secondary btn-start waves-effect waves-light filter-btn">Ver playas</button></div><div class="clearfix mbm"></div>';
-			initMap(data[chunk].name); // <- INIT Google Maps
+			// initMap(data[chunk].name); // <- INIT Google Maps
 		}
 
 		if(type === "beaches"){
 			// console.log("B");
 			// console.log("Consulta maps",data[chunk].id,data[chunk].name," : ");
-			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">Ver Clima</button></div><div class="clearfix mbm"></div>';
-			var originQuery = 'Consulta maps '+data[chunk].id+' '+data[chunk].name+' : ';
-			initMap(data[chunk].name,data[chunk].id,originQuery); // <- INIT Google Maps
+			responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-location="'+data[chunk].name+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">Ver Clima</button></div><div class="clearfix mbm"></div>';
+			// initMap(data[chunk].name,data[chunk].id,originQuery); // <- INIT Google Maps
 		}
 
 		if(type === "beach"){
 			// console.log(data);
 			var today = data[0].prediccion.dia[0];
 			console.log(today);
-			responseTemplate = "<b>"+data[0].nombre+"</b> : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
+			responseTemplate = "<b>"+queryMap.l+"</b> : "+today.tMaxima.valor1+" : "+today.estadoCielo.descripcion2;
 			responseTemplate += "<br>- - - -<br>"+JSON.stringify(today);
-			// responseTemplate = '<div class="col s8 title">'+data[chunk].id+' # <b>'+data[chunk].name+'</b></div><div class="col s4"><button data-id="'+data[chunk].id+'" data-type="beach" class="right btn btn-secondary btn-start waves-effect waves-light weather-btn">AJAX Call</button></div><div class="clearfix mbm"></div>';
+
+			console.log("gMap Q :",queryMap.l,queryMap.c,queryMap.r);			
+			initMap(); // <- INIT Google Maps
 		}
 
 		$('#response').append(responseTemplate);
@@ -181,21 +186,34 @@ var myLatLng;
 var pos;
 var gKey = "AIzaSyDJrPFg_yBfFe5TCJlT83nXswvfOz8e3HU";
 
-function initMap(queryLoc,queryID,originQ) {
+var queryMap = {
+	l : "", // Location name
+	c : "", // Location zip code
+	r: ""	// Region
+};
 
-	var queryID = queryID || "";
-	var originQ = originQ || "";
 
-	console.log("INIT MAPS!");
+function initMap() {
 
-	// var url = "https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key="+gKey;
-	if(queryID != ""){
-		var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryID+"+"+queryLoc+",+"+country+"CA&key="+gKey;
-		console.log(originQ);
+	/*
+	var queryCP = queryCP || "";
+	var region = region || "";
+	*/
+	var queryCP = queryMap.c;
+	var queryLoc = queryMap.l;
+	var region = queryMap.r;
+
+	console.log("INIT MAP!");
+
+	var url;
+
+	if(queryCP != ""){
+		url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryCP+"+"+queryLoc+"&region="+region+"&key="+gKey;
 	} else {
-		var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryLoc+"+"+country+"CA&key="+gKey;
+		url = "https://maps.googleapis.com/maps/api/geocode/json?address="+queryLoc+"&region="+region+"&key="+gKey;
 	}
 
+	// console.log(url);
 	callingAjax(url,printAjax);
 
 	/* MY LAT AND MY LONG
@@ -225,14 +243,40 @@ function initMap(queryLoc,queryID,originQ) {
 
 };
 
+function getRegion(country){
+	if(country === "spain"){
+		return "es";
+	}
+}
+
+function fixEScode(c){
+
+	var l = c.length;
+	var n = l - 2;
+	c = c.slice(0,n);
+	/*console.log(l,n,c);*/
+	return c;
+}
+
 function printMap(coordinates) {
-	console.log("PRINTING MAP!");
+
+	// console.log("PRINTING MAP!",coordinates);
 	map = new
+
 	google.maps.Map(document.getElementById('map'), {
 	    //CENTERING MAP
 	    center: coordinates,
-	    zoom: 10
+	    zoom: 15
 	});
+
+	$("#mapBox").toggle(); // <- SHow map box
+
+	var marker = new google.maps.Marker({
+		position: coordinates,
+		title:queryMap.l,
+		visible: true
+	});
+	marker.setMap(map);
 };
 
 function callingAjax(url,callback) {
@@ -259,8 +303,13 @@ function callingAjax(url,callback) {
 };
 
 function printAjax(resp){
+	
 	console.log("- - - - \n");
+
 	if(resp.results[0] != undefined){
+		var coord = resp.results[0].geometry.location;
+		printMap(coord);
+		/*
 		// var country = resp.results[0].address_components[3].long_name; // -> Country position changes
 		var country = resp.results[0].address_components // ARRAY;
 		var cL = country.length;
@@ -282,6 +331,7 @@ function printAjax(resp){
 				break;
 			}
 		}
+		*/
 
 	}else{
 		// console.error(resp);
